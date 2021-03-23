@@ -1,0 +1,80 @@
+#include <Ultrasonic.h>
+#define pino_trigger 6
+#define pino_echo 7
+
+Ultrasonic ultrasonic(pino_trigger, pino_echo);
+
+#include <Servo.h>
+
+#include <IRremote.h>  
+    
+IRrecv receptor(3);  
+decode_results resultado;
+int codigo;
+Servo  servo;
+int pos = 0;
+  
+void setup()  
+{  
+  pinMode(3,OUTPUT); 
+  receptor.enableIRIn();
+  Serial.begin(9600);
+  servo.attach(11);
+   servo.write(0); 
+}  
+
+void direita()
+ {
+  for(pos = 0; pos < 180; pos += 1);
+    {
+     servo.write(pos);
+      }
+      return loop;
+  }
+  
+void esquerda()
+ {
+  for(pos = 180; pos < 270; pos += 1);
+    {
+     servo.write(pos);  
+      }
+      return loop;
+  }
+
+void distancia()
+ {
+    //Le as informacoes do sensor, em cm e pol
+  float cmMsec, inMsec;
+  long microsec = ultrasonic.timing();
+  cmMsec = ultrasonic.convert(microsec, Ultrasonic::CM);
+  inMsec = ultrasonic.convert(microsec, Ultrasonic::IN);
+  //Exibe informacoes no serial monitor
+  Serial.print("Distancia em cm: ");
+  Serial.println(cmMsec);
+  delay(1000);
+  
+  }
+  
+void loop()  
+ {  
+  if (receptor.decode(&resultado))  
+  {  
+    codigo = resultado.value;
+    Serial.println(resultado.value,HEX);  
+    switch (codigo)  
+    {  
+      case (0xFF906F):  
+      direita();
+      break;     
+       
+      case (0xFFE01F):
+      esquerda();
+      break;
+
+      case(0xFF10EF):
+      distancia();
+    } 
+  receptor.resume();  
+  } 
+  delay(1000);
+}
